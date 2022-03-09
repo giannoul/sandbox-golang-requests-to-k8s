@@ -5,6 +5,10 @@ PWD		= $(shell pwd)
 --apply-ingress-nginx: 
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 
+.PHONY: --wait-for-ingress-to-get-ready
+--wait-for-ingress-to-get-ready:
+	kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx
+
 .PHONY: --deploy-application
 --deploy-application: 
 	kubectl apply -f manifests
@@ -14,7 +18,7 @@ PWD		= $(shell pwd)
 	kind create cluster --name ${KIND_CLUSTER} --config .kind/cluster-config.yml
 
 .PHONY: infra-create
-infra-create: --kind-create --apply-ingress-nginx --deploy-application
+infra-create: --kind-create --apply-ingress-nginx --wait-for-ingress-to-get-ready --deploy-application
 
 
 .PHONY: infra-delete
